@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.material3)
 
     implementation(libs.geckoview)
-
+    testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit5.jupiter)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
