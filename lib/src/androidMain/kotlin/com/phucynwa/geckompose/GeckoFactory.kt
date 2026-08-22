@@ -6,13 +6,15 @@ import org.mozilla.geckoview.GeckoSession
 
 internal object GeckoFactory {
 
-    private lateinit var geckoRuntime: GeckoRuntime
+    @Volatile
+    private var geckoRuntime: GeckoRuntime? = null
 
     internal fun createGeckoRuntime(context: Context): GeckoRuntime {
-        if (this::geckoRuntime.isInitialized.not()) {
-            geckoRuntime = GeckoRuntime.create(context)
+        return geckoRuntime ?: synchronized(this) {
+            geckoRuntime ?: GeckoRuntime.create(context.applicationContext).also {
+                geckoRuntime = it
+            }
         }
-        return geckoRuntime
     }
 
     internal fun createGeckoSession(context: Context): GeckoSession {

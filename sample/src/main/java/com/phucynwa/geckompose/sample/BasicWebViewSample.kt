@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.Icons.AutoMirrored.Filled
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +45,9 @@ import com.phucynwa.geckompose.rememberWebViewState
 import com.phucynwa.geckompose.sample.ui.theme.GeckomposeTheme
 
 class BasicWebViewSample : ComponentActivity() {
+
     val initialUrl = "https://google.com"
+
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +67,7 @@ class BasicWebViewSample : ComponentActivity() {
                             if (navigator.canGoBack) {
                                 IconButton(onClick = { navigator.navigateBack() }) {
                                     Icon(
-                                        imageVector = Icons.Default.ArrowBack,
+                                        imageVector = Filled.ArrowBack,
                                         contentDescription = "Back"
                                     )
                                 }
@@ -107,8 +110,8 @@ class BasicWebViewSample : ComponentActivity() {
                     val loadingState = state.loadingState
                     if (loadingState is LoadingState.Loading) {
                         LinearProgressIndicator(
-                            progress = loadingState.progress,
-                            modifier = Modifier.fillMaxWidth()
+                            progress = { loadingState.progress },
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
 
@@ -118,7 +121,7 @@ class BasicWebViewSample : ComponentActivity() {
                             override fun onPageStarted(
                                 view: WebView,
                                 url: String?,
-                                favicon: Bitmap?
+                                favicon: Bitmap?,
                             ) {
                                 super.onPageStarted(view, url, favicon)
                                 Log.d("Accompanist WebView", "Page started loading for $url")
