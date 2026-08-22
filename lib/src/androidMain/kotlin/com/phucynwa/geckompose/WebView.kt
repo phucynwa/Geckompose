@@ -4,11 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
 import org.mozilla.geckoview.GeckoSession
+import org.mozilla.geckoview.GeckoSession.SessionState
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
-import org.mozilla.geckoview.GeckoWebExecutor
-import org.mozilla.geckoview.WebRequest
-import java.nio.ByteBuffer
 
 class WebView @JvmOverloads constructor(
     context: Context,
@@ -76,20 +74,31 @@ class WebView @JvmOverloads constructor(
         historyUrl: String?,
     ) {
         val loader = GeckoSession.Loader()
-            .data(data, "text/html")
+
+        baseUrl?.let { loader.uri(it) }
+
+        val finalMimeType = if (encoding != null) {
+            "${mimeType ?: "text/html"}; charset=$encoding"
+        } else {
+            mimeType ?: "text/html"
+        }
+
+        loader.data(data, finalMimeType)
+
         session?.load(loader)
     }
 
     fun postUrl(url: String, postData: ByteArray) {
-        val webRequest = WebRequest.Builder(url)
-            .method("POST")
-            .body(ByteBuffer.wrap(postData))
-            .build()
-        GeckoWebExecutor(GeckoFactory.createGeckoRuntime(context)).fetch(webRequest)
+        val postString = String(postData, Charsets.UTF_8)
+        val html = POST_FORM_HTML
+            .trimIndent()
+            .replace($$"$url", url)
+            .replace($$"$postData", postString)
+        loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
     }
 
     fun restoreState(inState: Bundle) {
-        val state: GeckoSession.SessionState = inState.getParcelable(BUNDLE_KEY) ?: return
+        val state: SessionState = inState.getParcelable(BUNDLE_KEY) ?: return
         session?.restoreState(state)
     }
 
@@ -108,5 +117,34 @@ class WebView @JvmOverloads constructor(
     companion object {
 
         private const val BUNDLE_KEY = "gecko"
+
+        private const val POST_FORM_HTML = $$"""
+            <html>
+            <head>
+            <script>
+            function post() {
+                var form = document.createElement("form");
+                form.method = "POST";
+                form.action = "$url";
+                var params = "$postData".split("&");
+                for (var i = 0; i < params.length; i++) {
+                    var pair = params[i].split("=");
+                    if (pair.length >= 1) {
+                        var input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = decodeURIComponent(pair[0]);
+                        input.value = decodeURIComponent(pair[1] || "");
+                        form.appendChild(input);
+                    }
+                }
+                document.body.appendChild(form);
+                form.submit();
+            }
+            </script>
+            </head>
+            <body onload="post()">
+            </body>
+            </html>
+        """
     }
 }
