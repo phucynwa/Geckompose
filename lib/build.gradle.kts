@@ -1,58 +1,37 @@
 plugins {
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.compose.compiler)
 }
 
-android {
-    namespace = "com.phucynwa.geckompose.lib"
-    compileSdk = 34
+kotlin {
+    android {
+        namespace = "com.phucynwa.geckompose.lib"
+        compileSdk {
+            version = release(37) {
+                minorApiLevel = 1
+            }
+        }
+        minSdk = 26
 
-    defaultConfig {
-        minSdk = 21
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+
+    sourceSets {
+        androidMain.dependencies {
+            implementation(libs.core.ktx)
+            implementation(libs.appcompat)
+            implementation(libs.activity.compose)
+
+            implementation(project.dependencies.platform(libs.compose.bom))
+            implementation(libs.ui)
+            implementation(libs.ui.graphics)
+            implementation(libs.ui.tooling.preview)
+            implementation(libs.material3)
+
+            implementation(libs.geckoview)
+        }
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-}
-
-dependencies {
-
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity.compose)
-
-    implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
-
-    implementation(libs.geckoview)
-    testImplementation(platform(libs.junit5.bom))
-    testImplementation(libs.junit5.jupiter)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 }

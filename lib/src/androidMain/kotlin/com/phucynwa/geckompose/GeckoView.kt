@@ -40,8 +40,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.phucynwa.geckompose.LoadingState.Finished
-import com.phucynwa.geckompose.LoadingState.Loading
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -262,8 +260,8 @@ public open class AccompanistWebViewClient : WebViewClient() {
         state.loadingState = LoadingState.Finished
     }
 
-    override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
-        super.doUpdateVisitedHistory(view, url, isReload)
+    override fun doUpdateVisitedHistory(view: WebView, url: String?, reload: Boolean) {
+        super.doUpdateVisitedHistory(view, url, reload)
 
         navigator.canGoBack = view.canGoBack()
         navigator.canGoForward = view.canGoForward()
@@ -374,7 +372,7 @@ public sealed class LoadingState {
     /**
      * Describes a WebView that has not yet loaded for the first time.
      */
-    public object Initializing : LoadingState()
+    public data object Initializing : LoadingState()
 
     /**
      * Describes a webview between `onPageStarted` and `onPageFinished` events, contains a
@@ -385,7 +383,7 @@ public sealed class LoadingState {
     /**
      * Describes a webview that has finished loading content.
      */
-    public object Finished : LoadingState()
+    public data object Finished : LoadingState()
 }
 
 /**
